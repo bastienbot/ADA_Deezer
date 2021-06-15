@@ -29,7 +29,7 @@ start:
 // À toi de jouer maintenant, il va falloir remplir les trous !
 // ############################################################
 // Exercice 0 : Efface la ligne ci-dessous pour commencer le workshop
-
+/*
   remember mood = false
   remember hits = false
 
