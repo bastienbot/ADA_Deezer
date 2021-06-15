@@ -1,0 +1,28 @@
+{
+  "id": "fdab8ce3-6813-445d-8251-0dae40a11e7e",
+  "name": "ADA_Deezer",
+  "description": null,
+  "default_flow": "Default",
+  "flows": [
+    {
+      "name": "Default",
+      "description": "Simple barebones flow. Code your own chatbot from this template!",
+      "commands": []
+    }
+  ],
+  "files": [],
+  "functions": [
+    {
+      "name": "Deezer",
+      "description": null,
+      "args": [],
+      "import_url": null,
+      "runtime": "nodejs12.x",
+      "handler": "index.handler",
+      "environment": {},
+      "app_id": null,
+      "version": null
+    }
+  ],
+  "apps": []
+}

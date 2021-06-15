@@ -1,0 +1,137 @@
+// Ceci est un commentaire, ils commencent tous par //
+// Le CSML ignore les commentaires, ils sont utiles pour les développeurs :3
+
+// Un chatbot commence toujours par l'étape "start" ci-dessous
+start:
+  // On va saluer l'utilisateur avec la commande `say`
+  say "Salut!"
+  say "Je suis Deezobot, le bot qui te conseille les musiques et playlists du moment 🤙"
+  // On peut poser une question à l'utilisateur et donner des choix de boutons
+  say Question("Tu es prêt.e ?",
+    buttons=[
+      // Vous remarquerez qu'on utilise le mot clé "as", il permet au csml de se souvenir de ce bouton
+      // pour s'en servir plus tard (dans le if)
+      Button("Oui let's gooo! 🔥") as btnOui,
+      Button("Pas tout à fait 😕") as btnNon
+    ])
+  // "hold" indique au chatbot qu'il doit attendre une réponse de l'utilisateur (une phrase ou un click)
+	hold
+  // La réponse de l'utilisateur va arriver dans la variable `event`
+  // Dans le cas présent on va voir ce que contient cette variable en demandant au csml si event "match" le bouton Oui
+  if (event match btnOui) {
+    say "Super allons-y!"
+  } else {
+    say "Pas de soucis, je me tiens à ta disposition!"
+    goto end
+  }
+  
+// ############################################################
+// À toi de jouer maintenant, il va falloir remplir les trous !
+// ############################################################
+// Exercice 0 : Efface la ligne ci-dessous pour commencer le workshop
+
+  remember mood = false
+  remember hits = false
+
+  say "Trouvons les musiques faites pour toi!"
+  say "J'ai juste besoin de te poser quelques questions 🧐."
+	goto categories
+
+categories:
+  // 1 - Il manque un mot clé pour poser la question
+	???? Question("Tu es plutôt... ?",
+	buttons=[
+    Button("Fan des derniers hits 🔥") as btn_hits,
+    Button("De la musique au feeling 😌") as btn_feelings
+  ])
+  // 2 - Indique au chatbot d'attendre la réponse de l'utilisateur ici
+	????
+  // 3 - Voici une condition, il manque un mot clé plusieurs fois
+  if (event match btn_hits) {
+    ???? hits
+  }
+  if (event match btn_feelings) {
+    ???? moods
+  } else {
+    say "Clique sur un bouton :)"
+    ???? categories
+  }
+  goto moods
+
+
+// 4 - Il faut nommer l'étape ci-dessous
+????:
+  // 5 - Tu dois ajouter le mot clé manquant pour que ça marche
+  say ????("Comment te sens-tu en ce moment ?",
+	buttons=[
+	  Button("En super forme 💪", payload="forme"),
+    Button("Pas le moral 😩", payload="moral"),
+	  Button("C’est l’été 🏝", payload="ete"),
+	  Button("Let’s dance 💃🕺", payload="dance"),
+	  Button("Un peu anxieux.se 😖", payload="anx"),
+  ])
+  hold
+  // 6 - Tu dois te souvenir de la saisie de l'utilisateur en la mettant
+  // dans la variable `mood`
+  ???? mood = event
+  goto results
+  
+hits:
+  // 7 - Il manque BEAUCOUP de chose ci-dessous
+  say ????("Comment souhaites-tu que je classe les hits du moment ?",
+	????=[
+		????("Album"),
+		????("Artiste"),
+		????("Morceau"),
+		????("Playlist")
+  ])
+  hold
+  ???? hits = ????
+  // 8 - Indique au chatbot qu'il doit se rendre à l'étape results`
+  ???? results
+
+// 9 - Il manque le nom de l'étape
+????:
+  // BRAVO, tu as fini!
+  if (!mood) do mood = false
+  if (!hits) do hits = false
+	say "Roulement de tambours 🥁"
+	say Typing(3000)
+  remember res = App("Deezer", mood=mood, hits=hits)
+
+  if (res.length() == 0) {
+    say "Je n'ai pas trouvé de playlist, désolé 😔"
+    goto start
+  }
+  if (!res.id) goto resulthits
+  else goto resultsplaylist
+
+resultsplaylist:
+  say "Voici la playlist qui te correspond :"
+  say "**{{res.title}}**"
+  say "crée par *res.creator.name*, *{{res.fans}}* fans"
+  say Typing(3000)
+  say Image("{{res.picture_medium}}")
+  say Url("{{res.link}}", hide_url=true)
+  goto end
+
+resulthits:
+  do cards = []
+  foreach (val, index) in res {
+    if (val.title) do name = val.title
+    if (val.name) do name = val.name
+    if (val.picture_medium) do pic = val.picture_medium
+    if (val.cover_medium) do pic = val.cover_medium
+    if (val.artist.picture_medium)do pic = val.artist.picture_medium
+    do newCard = Card(
+      title=name,
+      // subtitle="{{val.fields.price_type}}€ - {{val.fields.address_name}}",
+      image_url=pic,
+      buttons=[Url(val.link, text=name)]
+    )
+    if (index < 6) do cards.push(newCard)
+  }
+  say Carousel(
+    cards = cards
+  )
+  goto end
